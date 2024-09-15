@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  api:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      -----YOUR ENV HERE---FILL THIS SECTION-----
+    networks:
+      - yet_another_network
+
+networks:
+  yet_another_network:
+   driver: host

@@ -1,9 +1,13 @@
 from typing import List, Dict, Any
 import datetime
+import sys
 import logging
+from os import getenv
+import os
 from pyrfc3339 import generate
 import pytz
 
+import uvicorn
 from fastapi import FastAPI, status as http_status, Depends, Query, Request
 from fastapi.exceptions import RequestValidationError, ValidationException
 from fastapi.responses import JSONResponse
@@ -14,23 +18,23 @@ from sqlalchemy.exc import IntegrityError
 from model.models import Tender, Bid, BidReview
 from model.create import get_db
 
-from .misc.validators import (tender as tender_model,
+from src.backend.misc.validators import (tender as tender_model,
                               bid as bid_model)
 
-from .misc.checkers import (bid as validate_bid,
+from src.backend.misc.checkers import (bid as validate_bid,
                             organisation as validate_org,
                             tender as validate_tender,
                             user as validate_user)
 
-from .misc.generators import (bid as generate_bid,
+from src.backend.misc.generators import (bid as generate_bid,
                               tender as generate_tender)
 
-from .misc.getters import (bid as get_bid,
+from src.backend.misc.getters import (bid as get_bid,
                            organisation as get_org,
                            tender as get_tender,
                            user as get_user)
 
-from .misc.funcs import (bid as bid_funcs,
+from src.backend.misc.funcs import (bid as bid_funcs,
                          tender as tender_funcs,
                          review as review_funcs)
 
@@ -39,6 +43,14 @@ app = FastAPI(debug=True)
 
 log = logging.getLogger(__name__)
 
+ADDRESS = getenv("SERVER_ADDRESS")
+
+if not ADDRESS:
+    log.fatal(msg="Connection parameters not provided. Need SERVER_ADDRESS env variable")
+    sys.exit(1)
+
+APP_HOST = ADDRESS.split(sep=":")[0]
+APP_PORT = int(ADDRESS.split(sep=":")[1])
 
 @app.get("/api/ping")
 def ping():
@@ -975,3 +987,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=http_status.HTTP_400_BAD_REQUEST,
         content={"reason": exc.errors()},
     )
+
+if __name__ == "__main__":
+    uvicorn.run(app, host=APP_HOST, port=APP_PORT)

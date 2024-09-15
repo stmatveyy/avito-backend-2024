@@ -3,8 +3,8 @@ from sqlalchemy.orm import sessionmaker
 import logging
 import sys
 from os import getenv
-log = logging.getLogger(__name__)
 
+log = logging.getLogger(__name__)
 
 POSTGRES_URL: str = getenv("POSTGRES_CONN")
 POSTGRES_USERNAME: str = getenv("POSTGRES_USERNAME")
